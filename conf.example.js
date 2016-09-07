@@ -15,6 +15,14 @@ module.exports = {
     host: 'localhost',
     port: 8080
   },
+  
+  proxies: [
+    {
+    path:'/'
+    host: 'localhost',
+    port: 8080
+    }
+  ],
 
   // Session cookie options, see: https://github.com/expressjs/cookie-session
   sessionCookie: {
