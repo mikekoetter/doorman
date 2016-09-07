@@ -16,6 +16,15 @@ log = require('./lib/log');
 var proxy = new Proxy(conf.proxyTo.host, conf.proxyTo.port);
 var proxyMiddleware = proxy.middleware();
 
+// load alternate proxies
+var proxies ={};
+if(conf.hasOwnProperty('proxies')){
+  conf.proxies.forEach(function(proxy){
+    proxies[proxy.path] = new Proxy(proxy.host||'localhost', proxy.port);
+  })
+}
+
+
 // Set up our auth strategies
 if (conf.modules.github) {
   var github = require('./lib/modules/github');
@@ -67,7 +76,12 @@ function checkUser(req, res, next) {
   if(req.url.indexOf('/_doorman') == 0) { return next(); }
 
   if(userCanAccess(req) || isPublicPath(req)) {
-    proxyMiddleware(req, res, next);
+    var middleware = proxyMiddleware;
+    // get route and load middleware
+    Object.keys(proxies).forEach(function(path){
+        if(req.url.indexOf(path) == 0) { return middleware = proxies[path].middleware; }
+    })
+    middleware(req, res, next);
   } else {
     if(req.session && req.session.auth) {
       // User had an auth, but it wasn't an acceptable one
