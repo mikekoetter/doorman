@@ -18,7 +18,7 @@ module.exports = {
   
   proxies: [
     {
-    path:'/'
+    path:'/',
     host: 'localhost',
     port: 8080
     }
